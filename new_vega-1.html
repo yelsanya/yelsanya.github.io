@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Embedding Vega-Lite</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.10.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.11.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.6.0"></script>
+    <style>
+      div.covid {
+      }
+      a:link, a:visited {
+        color: black;
+        border-style: solid;
+        border-color: black;
+        padding: 0px 2px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+      }
+      a:hover, a:active {
+        background-color: grey;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="list">
+      <form>
+        <label>
+          <input type="checkbox" id="sp" onchange="addSP(this)" /> Spain
+        </label>
+        <label>
+          <input type="checkbox" id="uk" onchange="addUK(this)" /> UK
+        </label>
+        <label>
+          <input type="checkbox" id="ru" onchange="addRU(this)" /> Russia
+        </label>
+        <label>
+          <input type="checkbox" id="it" onchange="addIT(this)" /> Italy
+        </label>
+        <label>
+          <input type="checkbox" id="us" onchange="addUS(this)" /> USA
+        </label>
+        <label>
+          <input type="checkbox" id="kr" onchange="addKR(this)" /> South Korea
+        </label>
+        <label>
+          <input type="checkbox" id="cn" onchange="addCN(this)" /> China
+        </label>
+      </form>
+    </div>
+    <form>
+      <label>
+        Start Date:
+        <select id="sm" onchange="draw()">
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+        </select>
+      </label>
+      <select id="sd" onchange="draw()"> </select>
+      <script>
+        for (var i = 1; i <= 31; i++) {
+          var select = document.getElementById('sd');
+          var option = document.createElement('OPTION');
+          select.options.add(option);
+          option.text = i;
+          option.value = i;
+        }
+      </script>
+      <label>
+        End Date:
+        <select id="em" onchange="draw()">
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5" selected="selected">May</option>
+        </select>
+      </label>
+      <select id="ed" onchange="draw()"> </select>
+      <script>
+        for (var i = 1; i <= 31; i++) {
+          var select = document.getElementById('ed');
+          var option = document.createElement('OPTION');
+          select.options.add(option);
+          option.text = i;
+          option.value = i;
+          if (i == 18) option.selected = 'selected';
+        }
+      </script>
+      <a id="search" href="" target="_blank" onclick="gsearch()">Search</a>
+    </form>
+
+    <div id="covidcum"></div>
+    <div id="covid"></div>
+    <div id="stock"></div>
+    <div id="stockdiff"></div>
+    <div id="parallelplot"></div>
+
+    <script type="text/javascript">
+      var defcountry =
+        "datum.country == 'Spain' || datum.country == 'United_Kingdom' || datum.country == 'Russia' || datum.country == 'Italy' || datum.country == 'United_States_of_America' || datum.country == 'South_Korea' || datum.country == 'China'";
+      var cnt = 0;
+      var sp = '',
+        uk = '',
+        ru = '',
+        it = '',
+        us = '',
+        kr = '',
+        cn = '';
+      function addSP(checkbox) {
+        if (checkbox.checked == true) sp = "datum.country == 'Spain'";
+        else sp = '';
+        draw();
+      }
+      function addUK(checkbox) {
+        if (checkbox.checked == true) uk = "datum.country == 'United_Kingdom'";
+        else uk = '';
+        draw();
+      }
+      function addRU(checkbox) {
+        if (checkbox.checked == true) ru = "datum.country == 'Russia'";
+        else ru = '';
+        draw();
+      }
+      function addIT(checkbox) {
+        if (checkbox.checked == true) it = "datum.country == 'Italy'";
+        else it = '';
+        draw();
+      }
+      function addUS(checkbox) {
+        if (checkbox.checked == true)
+          us = "datum.country == 'United_States_of_America'";
+        else us = '';
+        draw();
+      }
+      function addKR(checkbox) {
+        if (checkbox.checked == true) kr = "datum.country == 'South_Korea'";
+        else kr = '';
+        draw();
+      }
+      function addCN(checkbox) {
+        if (checkbox.checked == true) cn = "datum.country == 'China'";
+        else cn = '';
+        draw();
+      }
+      function gsearch(){
+        var page = 'https://www.google.com/search?tbs=cdr:1,cd_min:' +
+                    document.getElementById("sm").value +
+                    '/' +
+                    document.getElementById("sd").value +
+                    '/2020,cd_max:' +
+                    document.getElementById("em").value +
+                    '/' +
+                    document.getElementById("ed").value +
+                    '/2020&tbm=nws';
+        document.getElementById("search").href = page;
+      }
+      function draw() {
+        var filt = '';
+        var start = '(datum.month > ';
+        start += document.getElementById('sm').value;
+        start += ' || ( datum.month == ';
+        start += document.getElementById('sm').value;
+        start += ' && datum.day >= ';
+        start += document.getElementById('sd').value;
+        start += ' ))';
+        filt = start + ' && ';
+        var end = '(datum.month < ';
+        end += document.getElementById('em').value;
+        end += ' || ( datum.month == ';
+        end += document.getElementById('em').value;
+        end += ' && datum.day <= ';
+        end += document.getElementById('ed').value;
+        end += ' ))';
+        filt += end + ' && ';
+        var countries = '';
+        countries += sp;
+        if (uk != '') {
+          if (countries != '') countries += ' || ';
+          countries += uk;
+        }
+        if (ru != '') {
+          if (countries != '') countries += ' || ';
+          countries += ru;
+        }
+        if (it != '') {
+          if (countries != '') countries += ' || ';
+          countries += it;
+        }
+        if (us != '') {
+          if (countries != '') countries += ' || ';
+          countries += us;
+        }
+        if (kr != '') {
+          if (countries != '') countries += ' || ';
+          countries += kr;
+        }
+        if (cn != '') {
+          if (countries != '') countries += ' || ';
+          countries += cn;
+        }
+        if (countries == '') countries = defcountry;
+        filt += '(';
+        filt += countries;
+        filt += ' )';
+        var covidcuminit = {
+          width: 450,
+          height: 300,
+          $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+          description: 'Covid cases in 7 countries',
+          data: {
+            url:
+              'https://raw.githubusercontent.com/yelsanya/IV-datasets/master/covid.csv',
+          },
+          transform: [
+            {
+              filter: filt,
+            },
+            {
+              window: [
+                {
+                  op: 'sum',
+                  field: 'cases',
+                  as: 'casesTotal',
+                },
+              ],
+              sort: [{ field: 'date', order: 'ascending' }],
+              groupby: ['country'],
+              ignorePeers: false,
+              frame: [null, 0],
+            },
+          ],
+          encoding: {
+            x: { field: 'date', type: 'temporal' },
+          },
+          layer: [
+            {
+              mark: 'line',
+              encoding: {
+                y: { field: 'casesTotal', type: 'quantitative' },
+                color: { field: 'country', type: 'nominal' },
+              },
+            },
+            {
+              selection: {
+                index: {
+                  type: 'single',
+                  on: 'mousemove',
+                  encodings: ['x'],
+                  nearest: true,
+                },
+              },
+              mark: { type: 'point' },
+              encoding: {
+                y: { field: 'casesTotal', type: 'quantitative' },
+                opacity: { value: 0 },
+              },
+            },
+            {
+              transform: [
+                { filter: { and: ['index.date', { selection: 'index' }] } },
+              ],
+              mark: 'rule',
+            },
+            {
+              transform: [
+                { filter: { and: ['index.date', { selection: 'index' }] } },
+              ],
+              mark: 'text',
+              encoding: {
+                y: { value: 40 },
+                text: { field: 'date', type: 'temporal' },
+              },
+            },
+          ],
+          config: { text: { align: 'right', dx: -5, dy: 5 } },
+        };
+
+        var covidinit = {
+          width: 450,
+          height: 300,
+          $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+          description: 'Covid cases in 7 countries',
+          data: {
+            url:
+              'https://raw.githubusercontent.com/yelsanya/IV-datasets/master/covid.csv',
+          },
+          transform: [
+            {
+              filter: filt,
+            },
+          ],
+          encoding: {
+            x: { field: 'date', type: 'temporal' },
+          },
+          layer: [
+            {
+              mark: 'line',
+              encoding: {
+                y: { field: 'cases', type: 'quantitative' },
+                color: { field: 'country', type: 'nominal' },
+              },
+            },
+            {
+              selection: {
+                index: {
+                  type: 'single',
+                  on: 'mousemove',
+                  encodings: ['x'],
+                  nearest: true,
+                },
+              },
+              mark: { type: 'point' },
+              encoding: {
+                y: { field: 'cases', type: 'quantitative' },
+                opacity: { value: 0 },
+              },
+            },
+            {
+              transform: [
+                { filter: { and: ['index.date', { selection: 'index' }] } },
+              ],
+              mark: 'rule',
+            },
+            {
+              transform: [
+                { filter: { and: ['index.date', { selection: 'index' }] } },
+              ],
+              mark: 'text',
+              encoding: {
+                y: { value: 40 },
+                text: { field: 'date', type: 'temporal' },
+              },
+            },
+          ],
+          config: { text: { align: 'right', dx: -5, dy: 5 } },
+        };
+
+        var stockinit = {
+          width: 450,
+          height: 300,
+          $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+          description: 'Covid cases in 7 countries',
+          data: {
+            url:
+              'https://raw.githubusercontent.com/yelsanya/IV-datasets/master/stock.csv',
+          },
+          transform: [
+            {
+              filter: filt,
+            },
+          ],
+          encoding: {
+            x: { field: 'date', type: 'temporal' },
+          },
+          layer: [
+            {
+              mark: 'line',
+              encoding: {
+                y: { field: 'close', type: 'quantitative' },
+                color: { field: 'country', type: 'nominal' },
+              },
+            },
+            {
+              selection: {
+                index: {
+                  type: 'single',
+                  on: 'mousemove',
+                  encodings: ['x'],
+                  nearest: true,
+                },
+              },
+              mark: { type: 'point' },
+              encoding: {
+                y: { field: 'close', type: 'quantitative' },
+                opacity: { value: 0 },
+              },
+            },
+            {
+              transform: [
+                { filter: { and: ['index.date', { selection: 'index' }] } },
+              ],
+              mark: 'rule',
+            },
+            {
+              transform: [
+                { filter: { and: ['index.date', { selection: 'index' }] } },
+              ],
+              mark: 'text',
+              encoding: {
+                y: { value: 40 },
+                text: { field: 'date', type: 'temporal' },
+              },
+            },
+          ],
+          config: { text: { align: 'right', dx: -5, dy: 5 } },
+        };
+
+        var stockdiffinit = {
+          width: 450,
+          height: 300,
+          $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+          description: 'Covid cases in 7 countries',
+          data: {
+            url:
+              'https://raw.githubusercontent.com/yelsanya/IV-datasets/master/stock.csv',
+          },
+          transform: [
+            {
+              filter: filt,
+            },
+          ],
+          encoding: {
+            x: { field: 'date', type: 'temporal' },
+          },
+          layer: [
+            {
+              mark: 'line',
+              encoding: {
+                y: { field: 'perc', type: 'quantitative' },
+                color: { field: 'country', type: 'nominal' },
+              },
+            },
+            {
+              selection: {
+                index: {
+                  type: 'single',
+                  on: 'mousemove',
+                  encodings: ['x'],
+                  nearest: true,
+                },
+              },
+              mark: { type: 'point' },
+              encoding: {
+                y: { field: 'perc', type: 'quantitative' },
+                opacity: { value: 0 },
+              },
+            },
+            {
+              transform: [
+                { filter: { and: ['index.date', { selection: 'index' }] } },
+              ],
+              mark: 'rule',
+            },
+            {
+              transform: [
+                { filter: { and: ['index.date', { selection: 'index' }] } },
+              ],
+              mark: 'text',
+              encoding: {
+                y: { value: 40 },
+                text: { field: 'date', type: 'temporal' },
+              },
+            },
+          ],
+          config: { text: { align: 'right', dx: -5, dy: 5 } },
+        };
+
+        console.log(filt);
+
+        var parallelplot = {
+          $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+          description:
+            'Though Vega-Lite supports only one scale per axes, one can create a parallel coordinate plot by folding variables, using `joinaggregate` to normalize their values and using ticks and rules to manually create axes.',
+          data: {
+            url:
+              'https://raw.githubusercontent.com/yelsanya/IV-datasets/master/pplot.json',
+          },
+          width: 900,
+          height: 300,
+          transform: [
+            {
+              filter: countries,
+            },
+            { window: [{ op: 'count', as: 'index' }] },
+            {
+              fold: [
+                'covid1Month',
+                'covid2Month',
+                'covid3Month',
+                'covid4Month',
+                'stockfluct1',
+                'stockfluct2',
+                'stockfluct3',
+                'stockfluct4',
+                'gdpDifference',
+                'stockDifference',
+              ],
+            },
+            {
+              joinaggregate: [
+                { op: 'min', field: 'value', as: 'min' },
+                { op: 'max', field: 'value', as: 'max' },
+              ],
+              groupby: ['key'],
+            },
+            {
+              calculate: '(datum.value - datum.min) / (datum.max-datum.min)',
+              as: 'norm_val',
+            },
+            {
+              calculate: '(datum.min + datum.max) / 2',
+              as: 'mid',
+            },
+          ],
+          layer: [
+            {
+              mark: { type: 'rule', color: '#ccc' },
+              encoding: {
+                detail: { aggregate: 'count', type: 'quantitative' },
+                x: { type: 'nominal', field: 'key' },
+              },
+            },
+            {
+              mark: 'line',
+              encoding: {
+                color: { field: 'country', type: 'nominal' },
+                detail: { type: 'nominal', field: 'index' },
+                opacity: { value: 1 },
+                x: { type: 'nominal', field: 'key' },
+                y: { type: 'quantitative', field: 'norm_val', axis: null },
+                tooltip: [
+                  {
+                    type: 'quantitative',
+                    field: 'covid1Month',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'covid2Month',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'covid3Month',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'covid4Month',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'gdpDifference',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'stockDifference',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'stockfluct1',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'stockfluct2',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'stockfluct3',
+                  },
+                  {
+                    type: 'quantitative',
+                    field: 'stockfluct4',
+                  },
+                ],
+              },
+            },
+            {
+              encoding: {
+                x: { type: 'nominal', field: 'key' },
+                y: { value: 0 },
+              },
+              layer: [
+                {
+                  mark: { type: 'text', style: 'label' },
+                  encoding: {
+                    text: {
+                      aggregate: 'max',
+                      field: 'max',
+                      type: 'quantitative',
+                    },
+                  },
+                },
+                {
+                  mark: { type: 'tick', style: 'tick', size: 8, color: '#ccc' },
+                },
+              ],
+            },
+            {
+              encoding: {
+                x: { type: 'nominal', field: 'key' },
+                y: { value: 150 },
+              },
+              layer: [
+                {
+                  mark: { type: 'text', style: 'label' },
+                  encoding: {
+                    text: {
+                      aggregate: 'min',
+                      field: 'mid',
+                      type: 'quantitative',
+                    },
+                  },
+                },
+                {
+                  mark: { type: 'tick', style: 'tick', size: 8, color: '#ccc' },
+                },
+              ],
+            },
+            {
+              encoding: {
+                x: { type: 'nominal', field: 'key' },
+                y: { value: 300 },
+              },
+              layer: [
+                {
+                  mark: { type: 'text', style: 'label' },
+                  encoding: {
+                    text: {
+                      aggregate: 'min',
+                      field: 'min',
+                      type: 'quantitative',
+                    },
+                  },
+                },
+                {
+                  mark: { type: 'tick', style: 'tick', size: 8, color: '#ccc' },
+                },
+              ],
+            },
+          ],
+          config: {
+            axisX: {
+              domain: false,
+              labelAngle: 0,
+              tickColor: '#ccc',
+              title: null,
+            },
+            view: { stroke: null },
+            style: {
+              label: { baseline: 'middle', align: 'right', dx: -5 },
+              tick: { orient: 'horizontal' },
+            },
+          },
+        };
+
+        vegaEmbed('#covidcum', covidcuminit);
+        vegaEmbed('#covid', covidinit);
+        vegaEmbed('#stock', stockinit);
+        vegaEmbed('#stockdiff', stockdiffinit);
+        vegaEmbed('#parallelplot', parallelplot);
+      }
+      draw();
+    </script>
+  </body>
+</html>
