@@ -1,4 +1,5 @@
 <?php
-$myfile = fopen("index.php", "r") or die("Unable to open file!");
+$myfile = fopen("/challenge/web-serveur/ch13/index.php", "r") or die("Unable to open file!");
 echo fgets($myfile);
-fclose($myfile);?>
+fclose($myfile);
+?>
