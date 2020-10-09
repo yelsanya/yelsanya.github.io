@@ -17,6 +17,11 @@
     <link>https://www.w3schools.com/xml</link>
     <description>New XML tutorial on W3Schools</description>
   </item>
+  <item>
+    <title>passwd test</title>
+    <link>https://www.w3schools.com/xml</link>
+    <description>New XML tutorial on W3Schools</description>
+  </item>
 </channel>
 
 </rss> 
