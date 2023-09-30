@@ -7,8 +7,6 @@
     <p id=result>Nothing</p>
   </body>
   <script>
-    $.post( "https://172.27.212.13:5000/register", {username: "testimon", password: "testimon"}, function( data ) {
-      document.documentElement.innerHTML = '{"coord":{"lon":10.3951,"lat":63.4305},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"base":"stations","main":{"temp":11.06,"feels_like":10.7,"temp_min":10.55,"temp_max":11.62,"pressure":1007,"humidity":95},"visibility":10000,"wind":{"speed":0.89,"deg":104,"gust":2.68},"rain":{"1h":0.27},"clouds":{"all":99},"dt":1696107584,"sys":{"type":2,"id":2046252,"country":"NO","sunrise":1696051344,"sunset":1696092875},"timezone":7200,"id":3133880,"name":"Trondheim","cod":200}';
-    });
+    document.documentElement.innerHTML = '{"coord":{"lon":10.3951,"lat":63.4305},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"base":"stations","main":{"temp":11.06,"feels_like":10.7,"temp_min":10.55,"temp_max":11.62,"pressure":1007,"humidity":95},"visibility":10000,"wind":{"speed":0.89,"deg":104,"gust":2.68},"rain":{"1h":0.27},"clouds":{"all":99},"dt":1696107584,"sys":{"type":2,"id":2046252,"country":"NO","sunrise":1696051344,"sunset":1696092875},"timezone":7200,"id":3133880,"name":"Trondheim","cod":200}';
   </script>
 </html>
