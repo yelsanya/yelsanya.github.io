@@ -1,0 +1,14 @@
+<html>
+  <script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+  <body>
+    <p id=result>Nothing</p>
+  </body>
+  <script>
+    $.post( "http://127.0.0.1/register", {username: "testimon", password: "testimon"}, function( data ) {
+      $("#result" ).html( data );
+    });
+  </script>
+</html>
