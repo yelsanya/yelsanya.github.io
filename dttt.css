@@ -1,0 +1,14 @@
+h1 {
+	color: purple;
+	font-family: "helvetica neue", helvetica, "lucinda sans unicode", "sans serif";
+}
+
+body {
+	text-align:center;
+}
+
+canvas {
+	width: 100px;
+	height: 100px;
+	border: 1px solid black;
+}
